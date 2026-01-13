@@ -1,0 +1,35 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "."
+          target: "/home/ubuntu/backend"
+
+      - name: Build & Run Docker on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/backend
+            docker build -t backend .
+            docker stop backend || true
+            docker rm backend || true
+            docker run -d -p ${{ secrets.APP_PORT }}:${{ secrets.APP_PORT }} -e PORT=${{ secrets.APP_PORT }} --name backend backend
