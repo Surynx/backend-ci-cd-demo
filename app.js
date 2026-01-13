@@ -6,7 +6,7 @@ const app = express();
 dotenv.config();
 
 app.get("/",(req,res)=>{
-    res.json({ message: "CI/CD backend working 🚀" });
+    res.json({ message: "CI/CD backend working 🚀..hai" });
 });
 
 app.listen(process.env.PORT,()=>console.log("Server running....⏳"));
